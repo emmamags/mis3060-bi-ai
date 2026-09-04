@@ -8,9 +8,11 @@ Claude states that credit score is very important to include as a borrowing attr
 How does credit score incorporate qualitative variables like defaults on payments into a quantitative score? 
 ## Question 2:
 ### 1. Exact Prompt
-"This portfolio provides five loan purposes: Auto, Personal, Home Improvement, Education, and Business. What would a portfolio committee typically want to see in a quarterly review from a lender with a large education and home improvement loan?"
+"Given Wildcat’s mix of Auto, Personal, Home Improvement, Education, and Business loans, what strategic issues should a portfolio committee prioritize in a quarterly review, particularly for a lender with significant exposure to Education and Home Improvement loans?"
 ### 2. Summary
+Although home improvement is the most common of the four loan types, it consistently underperforms, and portfolio managers need to account for this when reviewing and underwriting loans and should consider scaling back approved loans and increasing rates. Education loans carry less risk, but their performance has declined in recent years, so this sector also needs monitoring. Overall, identifying problems in the lending market early will help the lender make more informed growth and pricing decisions.
 ### 3. Follow-up Question
+How do you know/where did you find that information that education loans are now carrying more risk than they did in the past? And why is that happening?
 ## Question 3:
 ### 1. Exact Prompt
 "The portfolio has four status categories (Current, Paid Off, Default, Delinquent). Explain the difference between delinquency and default and how that maps onto Wildcat's four status categories"
