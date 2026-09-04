@@ -10,11 +10,13 @@ How does credit score incorporate qualitative variables like defaults on payment
 ### 1. Exact Prompt
 "Given Wildcat’s mix of Auto, Personal, Home Improvement, Education, and Business loans, what strategic issues should a portfolio committee prioritize in a quarterly review, particularly for a lender with significant exposure to Education and Home Improvement loans?"
 ### 2. Summary
-Although home improvement is the most common of the four loan types, it consistently underperforms, and portfolio managers need to account for this when reviewing and underwriting loans and should consider scaling back approved loans and increasing rates. Education loans carry less risk, but their performance has declined in recent years, so this sector also needs monitoring. Overall, identifying problems in the lending market early will help the lender make more informed growth and pricing decisions.
+Although home improvement is the most common of the four loan types, it consistently underperforms, and portfolio managers should account for this when reviewing and underwriting loans, and consider scaling back approvals and increasing rates. Education loans carry less risk, but their performance has declined in recent years, so this sector also needs monitoring. Overall, identifying problems in the lending market early will help the lender make more informed growth and pricing decisions.
 ### 3. Follow-up Question
 How do you know/where did you find that information that education loans are now carrying more risk than they did in the past? And why is that happening?
 ## Question 3:
 ### 1. Exact Prompt
 "The portfolio has four status categories (Current, Paid Off, Default, Delinquent). Explain the difference between delinquency and default and how that maps onto Wildcat's four status categories"
 ### 2. Summary
+Delinquency means a borrower has missed payments on a loan, but the loan is still active and can either recover or eventually default. On the other hand, defaulting on a loan means the borrower is no longer expected to repay the agreed amount. Claude states that delinquency should be regarded as an early sign of credit risk and taken into account when underwriting loans; however, the wildcat portfolio does not show whether delinquent loans eventually default or become active again, so we cannot see the true outcome of these loans.  
 ### 3. Follow-up Question
+How heavily does delinquency affect a borrower's credit score? How about defaulting on a loan?
