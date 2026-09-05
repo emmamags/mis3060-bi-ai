@@ -9,6 +9,7 @@ Use analogies and everyday language. Comparing a confidence interval to a weathe
 
 Show, don't just tell. A simple visual — shaded confidence bands on a chart, a "data as of" timestamp, or a footnote flagging excluded records...
 ### 3. My Evaluation 
+I think Claude's answer to this prompt was not bad; it gave a broad overview of the topic, and I think it was a good starting point for someone brainstorming answers to this question. That said, even though the suggestions were good, the examples weren't fully fleshed out, and a follow-up question for each category would be needed before a BI analyst could form a clear idea of how to communicate data limitations. 
 ## Strategy 2
 ### 1. Complete prompt
 "You are a senior credit risk analyst explaining data limitations to your family at Christmas dinner. How should you communicate this to them?"
@@ -21,12 +22,17 @@ A few analogies that tend to work well around a dinner table:
 
 The rearview mirror problem — your risk model is built entirely on 
 ### 3. My Evaluation
+When it comes to explanation and examples, Claude responded more effectively to this prompt than the latter. It really broke down what family members at the table will not understand, how to make them understand, and also how to respond to common follow-up questions without getting frustrated. What I did not like about this response was its formatting: it gave the advice in bulky paragraphs, so if you wanted to find a specific piece of information, you had to reread the whole response.  
 ## Strategy 3
 ### 1. Complete prompt
 "In a list, give me 10 ways a BI analyst should communicate data limitations to a non-technical audience?"
 ### 2. First 150 Words
-1.	Lead with the "so what," not the caveat. Say what the limitation means for their decision before you explain the technical reason — "this number could be off by 10% either way, so I wouldn't use it to justify a big budget cut" lands better than opening with sample size math. 
-2.	 Use a familiar analogy instead of statistical vocabulary. Swap "selection bias" for "we only hear from customers who bothered to fill out the survey, so we're missing everyone who just quietly left." 
-3.	Give a confidence range instead of a false-precision number. "Somewhere between 800 and 950 customers, most likely around 870" is more honest and more usable than a single decimal-point figure that implies certainty you don't have. 
-4.	Show, don't just tell — put the caveat on the chart itself. A shaded band around a trend line or a footnote under a KPI card ("excludes returns processed after March") reaches people who'd skim past a verbal disclaimer.
+1. Lead with the takeaway, not the caveat. State the finding first, then the limitation — "Sales grew 12% last quarter, though this excludes returns processed after March 15" — so the limitation doesn't bury the insight. 
+2.	Use analogies instead of statistical jargon. Swap "margin of error" for something like "this number could be off by a little, similar to how a weather forecast isn't exact down to the degree." 
+3.	Show a confidence range visually. A shaded band around a trend line or a simple "low/likely/high" range communicates uncertainty faster than a written explanation of standard error. 
+4.	Translate sample size into everyday terms. Instead of "n=42," say "this is based on a small group of customers, so it might not represent everyone" — the concern registers immediately.
+5.	Name the gap in plain terms, not the technical cause. "We don't have data on walk-in customers, only online orders" lands better than "the dataset excludes non-digitized POS transactions."
 ### 3. My Evaluation
+This response was extremely readable and organized and gave good examples for each bullet point. But it didn't go in-depth on each point, like the previous two, which means more tokens would need to be used on follow-up questions. 
+## Conclusion section
+Personally, I think that strategy 3 produced the best response for a BI analyst. Although follow-up questions may be needed, that's OK when you consider how much time will be saved because it is organized and easy to read. Also, because of the format, follow-up questions will not have to be long (i.e., give another example of idea 6). In comparison, prompt 2 would have to cite a specific example or point in words (i.e give me another way to respond to the "who gets counted" problem); this would use up more tokens and valuable time. Overall, I think strategy 3 is a better version of prompt 1 in terms of content and is more organized than prompt 2, making it the best option of the 3 for a BI analyst. 
