@@ -1,5 +1,5 @@
 """
-MIS3060 - HW03: Executive change events (8-K Item 5.02) from SEC EDGAR  [v2]
+MIS3060 - HW03: Executive change events (8-K Item 5.02) from SEC EDGAR  [v3]
 ----------------------------------------------------------------------
 One script, one run. For each of five companies it:
   1. Sends every HTTP request with the required SEC User-Agent header
@@ -15,7 +15,7 @@ One script, one run. For each of five companies it:
   7. Saves everything to hw03/executive_events.csv
 
 Requirements:  pip install requests beautifulsoup4
-Run:           python executive_events.py
+Run:           python hw03/hw03_executives.py   (from the project folder)
 """
 
 import csv
@@ -211,16 +211,36 @@ APPOINT_FALSE_POS = re.compile(
 COMP_RE = re.compile(r"base salar(?:y|ies)|target award|bonus", re.I)
 KEYWORD_NEAR_CHARS = 100
 
-SUCCEED_RE = re.compile(r"\b(?:will )?succeed(?:s|ed|ing)?\b|\bsuccessor to\b", re.I)
+SUCCEED_RE = re.compile(
+    r"\b(?:will )?succeed(?:s|ed|ing)?\b|\bsuccessor to\b|\breplac(?:e|es|ed|ing)\b|"
+    r"\btransition of (?:duties|responsibilities|the role) from\b", re.I)
+
+# Standard executive abbreviations, expanded so titles come out in full
+ACRONYMS = {
+    "CEO": "Chief Executive Officer", "CFO": "Chief Financial Officer",
+    "COO": "Chief Operating Officer", "CTO": "Chief Technology Officer",
+    "CAO": "Chief Accounting Officer", "CLO": "Chief Legal Officer",
+    "CHRO": "Chief Human Resources Officer", "CPO": "Chief People Officer",
+    "EVP": "Executive Vice President", "SVP": "Senior Vice President",
+    "VP": "Vice President",
+}
+
+# Trailing employer names to drop from titles ("... Officer of NVIDIA Corporation")
+EMPLOYER_SUFFIX_RE = re.compile(
+    r",?\s+(?:of|at)\s+(?:the\s+)?(?:Company|Firm|NVIDIA(?: Corporation)?|Apple(?: Inc\.?)?|"
+    r"Microsoft(?: Corporation)?|Walmart(?: Inc\.?)?|JPMorgan Chase(?: & Co\.?)?|JPMorgan)\s*$")
+
+# "... of Consumer & Community Banking", "... of Sam's Club", "... of the Firm"
+OF_UNIT = r"(?: of (?:the )?[A-Z][A-Za-z'&.\-]*(?: (?:[A-Z][A-Za-z'&.\-]*|&))*)?"
 
 TITLE_ATOMS = [
     r"(?:Executive |Senior |Corporate )*Vice President(?:,? (?:of )?(?:[A-Z][A-Za-z&]+|&)(?: (?:[A-Z][A-Za-z&]+|&|and))*)?",
-    r"Chief (?:[A-Z][a-z]+ ){1,3}Officer",
-    r"(?:CEO|CFO|COO|CTO|CAO|CHRO|CLO)",
-    r"President",
+    r"(?i:(?:executive |senior )*vice president)",
+    r"(?:Co-)?Chief (?:[A-Z][a-z]+ ){1,3}Officers?" + OF_UNIT,
+    r"(?:Co-)?Presidents?" + OF_UNIT,
     r"(?:Non-Executive |Independent |Executive )?Chair(?:man|woman|person)?(?: of the Board(?: of Directors)?)?",
     r"Lead Independent Director",
-    r"General Counsel",
+    r"(?i:general counsel)",
     r"(?:Corporate )?Secretary",
     r"(?:Corporate )?(?:Controller|Treasurer)",
     r"Principal (?:Accounting|Financial|Executive) Officer",
@@ -249,6 +269,7 @@ worldwide operations marketing sales legal risk people u s usa new york
 certain officers arrangements compensatory departure departures appointments elections
 award awards target targets opportunity salary incentive equity date covenant agreement
 agreements competition club
+presidents executives sole current former messrs
 """.split())
 
 NAME_TOKEN = r"(?:[A-Z][a-zA-Z'\-]+|[A-Z]\.)"
@@ -257,7 +278,9 @@ HONORIFIC_RE = re.compile(r"\b(?:Mr|Ms|Mrs|Dr)\.\s+([A-Z][a-zA-Z'\-]+)")
 
 
 def _is_stop(tok):
-    return tok.strip(".,").lower() in STOP_WORDS
+    t = tok.strip(".,").lower()
+    # "Co-Chief", "Co-Presidents": every hyphen piece is a stop word
+    return t in STOP_WORDS or all(part in STOP_WORDS for part in t.split("-"))
 
 
 def find_full_names(text):
@@ -328,6 +351,11 @@ def title_spans(sentence):
 
 def _clean_title(title):
     title = title.strip(" ,;")
+    title = title.replace(", and ", " and ")
+    title = re.sub(r"\b(President|Officer|Director|Chair)s\b", r"\1", title)   # Co-Presidents -> Co-President
+    title = EMPLOYER_SUFFIX_RE.sub("", title).strip(" ,;")
+    if title == title.lower():                                       # "general counsel"
+        title = title.title()
     if title.lower() in ("director", "independent director", "non-employee director",
                          "member of the board", "member of the board of directors"):
         title = "Director" if "independent" not in title.lower() else "Independent Director"
@@ -385,11 +413,116 @@ def find_effective_date(sentences, report_date):
     for s in sentences:
         # ignore "On <date>, X informed/announced..." - that's the announcement date
         for m in DATE_RE.finditer(s):
-            if not re.search(r"\b(?:On|on|dated|As of|as of)\s*$", s[:m.start()]):
+            if not re.fullmatch(r"\s*(?:\([a-z]\)\s*)?On\s*", s[:m.start()]):
                 d = parse_date(m.group(0))
                 if d:
                     return d
     return "Not specified"
+
+
+def normalize_section(section):
+    """Tidy filing language so names and full titles are easier to read off."""
+    # Remove the standard Item 5.02 heading (it contains "Appointment"/"Election")
+    section = re.sub(r"Item\s*5\.02\.?\s*Departure of Directors.*?Compensatory Arrangements of Certain Officers\.?",
+                     " ", section, count=1, flags=re.I)
+    # Drop alias asides: "Vice President, or VP, and ..." / "NVIDIA Corporation, or the Company, ..."
+    section = re.sub(r",\s+or\s+(?:the\s+)?(?:[A-Z]{2,6}s?|Company|Firm|[A-Z][A-Za-z]+ [A-Z]{2,6}s?),", ",", section)
+    # Abbreviations the filing defines itself: Consumer & Community Banking ("CCB")
+    defined = {}
+    for m in re.finditer(r'((?:[A-Z][\w\'.\-]*\s+(?:&\s+)?){1,6})\(\s*"?([A-Z]{2,6})"?\s*\)', section):
+        defined[m.group(2)] = re.sub(r"^The\s+", "", m.group(1).strip())
+    section = re.sub(r'\s*\(\s*"?[A-Z]{2,6}"?\s*\)', "", section)
+    for abbr, full in {**ACRONYMS, **defined}.items():
+        section = re.sub(rf"\b{abbr}(s?)\b", lambda m, f=full: f + m.group(1), section)
+    return section
+
+
+def appositive_end(sentence, name_end):
+    """
+    If the name is followed by its title ("Ajay K. Puri, Executive Vice President, ...
+    of NVIDIA Corporation, notified ..."), return (end of that aside, title span).
+    Keyword distance is measured from here, so a long title doesn't push the
+    "retire"/"appointed" keyword out of range.
+    """
+    pos = name_end
+    age = re.match(r",\s*(?:age\s+)?\d{2},", sentence[pos:])
+    if age:
+        pos += age.end()
+    lead = re.match(r",?\s*(?:(?:the|its|our|current|former|then-current|[A-Z][A-Za-z]+'s)\s+)*", sentence[pos:])
+    start = pos + lead.end()
+    for ts, te in title_spans(sentence):
+        if ts == start:
+            comma = sentence.find(",", te)
+            end = comma + 1 if comma != -1 and comma - te <= 60 else te
+            return end, (ts, te)
+    return pos, None
+
+
+def assign_events(sentence, names):
+    """
+    Give each person the event keyword that belongs to THEM:
+      * "appointed/elected/named <Name>"          -> that name (object of the verb)
+      * "<Name> ... will retire / was appointed"  -> nearest name BEFORE the keyword (subject),
+                                                     plus co-subjects joined by "and"
+      * "A will succeed B", "transition of duties from B", "replacing B"
+                                                  -> B = departure, A = appointment
+    Returns {name: (event_type, distance_chars, keyword_end)}.
+    """
+    result = {}
+
+    def put(name, etype, dist, kw_end):
+        if name not in result or dist < result[name][1]:
+            result[name] = (etype, dist, kw_end)
+
+    ext = {n: appositive_end(sentence, e)[0] for n, _, e in names}
+    succession = list(SUCCEED_RE.finditer(sentence))
+    for m in succession:
+        obj = next((n for n in names if 0 <= n[1] - m.end() <= 30), None)
+        if obj:
+            put(obj[0], "departure", 0, m.end())
+        subj = [n for n in names if n[2] <= m.start() and (not obj or n[0] != obj[0])]
+        if subj:
+            put(subj[-1][0], "appointment", max(0, m.start() - ext[subj[-1][0]]), m.end())
+
+    cleaned = APPOINT_FALSE_POS.sub(lambda m: " " * len(m.group(0)), sentence)
+    keywords = [(m.start(), m.end(), "departure") for m in DEPART_RE.finditer(sentence)]
+    keywords += [(m.start(), m.end(), "appointment") for m in APPOINT_RE.finditer(cleaned)]
+    for ks, ke, etype in sorted(keywords):
+        if any(m.start() <= ks < m.end() for m in succession):
+            continue
+        obj = next((n for n in names if 0 <= n[1] - ke <= 20), None)
+        if obj:                                   # "appointed Scott Gawel"
+            put(obj[0], etype, 0, ke)
+            continue
+        before = [n for n in names if n[2] <= ks]
+        if before:                                # "Marianne Lake ... has decided to retire"
+            i = names.index(before[-1])
+            group = [names[i]]
+            while i > 0 and re.fullmatch(r"\s*(?:,\s*(?:age\s+)?\d{2}\s*)?,?\s*(?:and|&)\s*",
+                                         sentence[names[i - 1][2]:names[i][1]]):
+                i -= 1
+                group.append(names[i])            # "Doug Petno, 61, and Troy Rohrbaugh, 56, ..."
+            dist = max(0, ks - ext[before[-1][0]])
+            for g in group:
+                put(g[0], etype, dist, ke)
+            continue
+        after = [n for n in names if n[1] >= ke]
+        if after:
+            put(after[0][0], etype, after[0][1] - ke, ke)
+    return result
+
+
+def pick_title(sentence, etype, name_end, kw_end):
+    """Full title for this person in this sentence."""
+    _, appos = appositive_end(sentence, name_end)
+    if etype == "departure" and appos:            # role they are leaving sits right after the name
+        return _clean_title(sentence[appos[0]:appos[1]])
+    after_kw = [sp for sp in title_spans(sentence) if kw_end <= sp[0] <= kw_end + 120]
+    if after_kw:                                  # "appointed X as <title>" / "elected <title>"
+        return _clean_title(sentence[after_kw[0][0]:after_kw[0][1]])
+    if appos:
+        return _clean_title(sentence[appos[0]:appos[1]])
+    return find_title(sentence, name_end)
 
 
 def classify_names_in_sentence(sentence, names):
@@ -441,8 +574,7 @@ def _is_partial_of(short, long):
 
 def extract_events(section, report_date):
     """Return a list of {event_type, person_name, title, effective_date}."""
-    section = re.sub(r"Item\s*5\.02\.?\s*Departure of Directors.*?Certain Officers\.?", " ",
-                     section, count=1, flags=re.I)
+    section = normalize_section(section)
     is_comp_filing = bool(COMP_RE.search(section))
 
     # Canonical names: drop partial names when the full name is in the same filing
@@ -474,7 +606,7 @@ def extract_events(section, report_date):
                 seen.add(n[0])
                 uniq.append(n)
 
-        for name, (etype, distance) in classify_names_in_sentence(sentence, uniq).items():
+        for name, (etype, distance, kw_end) in assign_events(sentence, uniq).items():
             # Pay-only disclosures: ignore names with no departure/appointment keyword nearby
             if is_comp_filing and distance > KEYWORD_NEAR_CHARS:
                 continue
@@ -485,7 +617,7 @@ def extract_events(section, report_date):
                 people.setdefault(name, []).append(("departure", change[0], sentence))
                 people.setdefault(name, []).append(("appointment", change[1], sentence))
             else:
-                people.setdefault(name, []).append((etype, find_title(sentence, name_end), sentence))
+                people.setdefault(name, []).append((etype, pick_title(sentence, etype, name_end, kw_end), sentence))
 
     events = []
     for name, mentions in people.items():

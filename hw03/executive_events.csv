@@ -1,0 +1,24 @@
+company,ticker,cik,filing_date,event_type,person_name,title,effective_date
+Apple Inc.,AAPL,0000320193,2025-12-05,departure,Kate Adams,General Counsel,2026-03-01
+Apple Inc.,AAPL,0000320193,2025-12-05,appointment,Jennifer Newstead,General Counsel,2026-03-01
+Apple Inc.,AAPL,0000320193,2026-01-02,appointment,Ben Borders,Principal Accounting Officer,2026-01-01
+Apple Inc.,AAPL,0000320193,2026-01-02,departure,Chris Kondo,Principal Accounting Officer,Not specified
+Microsoft Corporation,MSFT,0000789019,2026-05-14,appointment,Carmine Di Sibio,Not specified,2026-05-13
+Microsoft Corporation,MSFT,0000789019,2026-06-05,departure,Reid Hoffman,member of the Board of Director,Not specified
+NVIDIA Corporation,NVDA,0001045810,2026-01-23,departure,Persis Drell,Not specified,2026-01-20
+NVIDIA Corporation,NVDA,0001045810,2026-04-27,departure,Donald Robertson,Vice President and Chief Accounting Officer,2026-05-04
+NVIDIA Corporation,NVDA,0001045810,2026-04-27,appointment,Scott Gawel,Vice President and Chief Accounting Officer,2026-05-04
+NVIDIA Corporation,NVDA,0001045810,2026-05-08,appointment,Suzanne Nora Johnson,Director,2026-07-13
+NVIDIA Corporation,NVDA,0001045810,2026-07-02,departure,Ajay K. Puri,"Executive Vice President, Worldwide Field Operations",Not specified
+NVIDIA Corporation,NVDA,0001045810,2026-07-02,appointment,Nicholas Parker,"Executive Vice President, Worldwide Field Operations",2026-08-24
+JPMorgan Chase & Co.,JPM,0000019617,2026-06-25,appointment,Troy Rohrbaugh,Co-President,2026-06-25
+JPMorgan Chase & Co.,JPM,0000019617,2026-06-25,appointment,Doug Petno,Co-President,2026-06-25
+JPMorgan Chase & Co.,JPM,0000019617,2026-06-25,departure,Marianne Lake,Chief Executive Officer of Consumer & Community Banking,Not specified
+Walmart Inc.,WMT,0000104169,2025-10-22,appointment,Dwayne Milum,Senior Vice President and Controller,2026-02-01
+Walmart Inc.,WMT,0000104169,2025-11-14,appointment,John R. Furner,Not specified,2026-02-01
+Walmart Inc.,WMT,0000104169,2026-01-08,appointment,Shishir Mehrotra,Director,2026-01-08
+Walmart Inc.,WMT,0000104169,2026-01-16,appointment,David Guggina,"Executive Vice President, President and Chief Executive Officer",2026-02-01
+Walmart Inc.,WMT,0000104169,2026-01-16,departure,John Furner,President and Chief Executive Officer,2025-11-14
+Walmart Inc.,WMT,0000104169,2026-01-16,departure,Kathryn McLay,"Executive Vice President, President and Chief Executive Officer",Not specified
+Walmart Inc.,WMT,0000104169,2026-01-16,appointment,Christopher Nicholas,"Executive Vice President, President and Chief Executive Officer",Not specified
+Walmart Inc.,WMT,0000104169,2026-01-16,appointment,Latriece Watkins,"Executive Vice President, President and Chief Executive Officer",2026-01-16
