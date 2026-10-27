@@ -15,7 +15,7 @@ quarantine_reason,client_id,first_name,last_name,age,city,state,zip_code,risk_pr
 1a near-duplicate of an existing client,2514,Benjamin,Armstron,33,Jamesborough,FL,70775,Aggressive,Retail,IRA,142838.38,2015-02-09,13,True,2166
 1a near-duplicate of an existing client,2515,Matthew,Pacen,67,South Zacharyshire,PA,25729,Balanced,Retail,Taxable,214515.89,2015-11-12,12,False,889
 1a near-duplicate of an existing client,2516,Jeffrey,Heste,64,Wisemouth,GA,48974,Moderately Conservative,Retail,IRA,357072.62,2018-10-24,3,True,1378
-1a near-duplicate of an existing client,2517,Kerri,Edward,67,Shafferbury,FL,55927,Moderately Aggressive,Retail,Taxable,285510.56,2016-09-28,8,True,739
+1a near-duplicate of an existing client,2517,Kerri,Edward,67,Shafferbury,Florida,55927,Moderately Aggressive,Retail,Taxable,285510.56,2016-09-28,8,True,739
 1a near-duplicate of an existing client,2518,Jill,Kell,36,South Jennifer,NY,48595,Conservative,Retail,Trust,114955.78,2021-03-28,23,True,1298
 1a near-duplicate of an existing client,2519,Matthew,Cervante,52,Muellerchester,FL,74846,Moderately Conservative,Retail,Taxable,331606.56,2021-04-18,18,True,560
 1a near-duplicate of an existing client,2520,Olivia,Lewi,42,South Ashleybury,FL,86718,Moderately Aggressive,HNW,IRA,2192940.76,2021-02-28,9,True,2421

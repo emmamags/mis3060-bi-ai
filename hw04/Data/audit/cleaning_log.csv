@@ -2,10 +2,10 @@ table,issue,action,rows_affected,note
 fact_transactions,1f security_id stored as decimal text,convert,197175,'45.0' -> '45'; all now match dim_security as text
 fact_portfolio_snapshot,1d return_ytd stored as percent text,convert,300,divided by 100; all 300 reconcile to return - benchmark = alpha (max gap 0.000050)
 dim_client,1e state written as full name,standardize,78,7-entry name -> USPS code map
-dim_client,1a near-duplicate clients,quarantine,25,"matched on 7 fields, last name differs by one letter, no fact rows; see quarantine_dim_client_duplicates.csv"
-dim_client,1g blank risk_profile,fill,75,"filled 'Balanced': every one uses benchmark 3, which only Balanced clients use; flag risk_profile_imputed"
+dim_client,1a near-duplicate clients,quarantine,25,"match on every field except a one-letter last-name difference, no fact rows; see quarantine_dim_client_duplicates.csv"
+dim_client,1g blank risk_profile,fill,75,filled from benchmark mapping {'Balanced': 75}; 1 more blank was on a quarantined duplicate; flag risk_profile_imputed
 fact_transactions,1b client_id not in dim_client,quarantine,200,see quarantine_fact_transactions_orphans.csv
-fact_transactions,1c negative shares on Buy,convert,835,absolute value; all reconcile to amount = shares x price
+fact_transactions,1c negative shares on Buy,convert,835,absolute value; all reconcile to amount = shares x price; 1 more was on a quarantined orphan
 fact_portfolio_snapshot,2a aum exactly 1000 (floor/placeholder),flag,420,aum_floor_flag; value unchanged
 fact_portfolio_snapshot,2b extreme return_ytd,flag,2157,return_outlier_flag; value unchanged
 dim_advisor,no defects requiring change,leave as is,0,see decision_log.md section 3/4

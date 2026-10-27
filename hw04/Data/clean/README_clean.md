@@ -1,17 +1,5 @@
 # Part C — Cleaning program
-
-| File | Raw rows | Clean rows | Quarantined |
-|---|---:|---:|---:|
-| `dim_advisor.csv` | 25 | 25 | 0 |
-| `dim_client.csv` | 2,525 | 2,500 | 25 |
-| `dim_date.csv` | 1,827 | 1,827 | 0 |
-| `dim_security.csv` | 500 | 500 | 0 |
-| `dim_benchmark.csv` | 8 | 8 | 0 |
-| `fact_fees.csv` | 122,197 | 122,197 | 0 |
-| `fact_portfolio_snapshot.csv` | 129,547 | 129,547 | 0 |
-| `fact_transactions.csv` | 298,772 | 298,572 | 200 |
-
-## Relationships
+## 1. Relationships
 
 All are many-to-one, from the fact (or child) table to the dimension.
 
@@ -33,7 +21,7 @@ All are many-to-one, from the fact (or child) table to the dimension.
 
 Facts join to `dim_date` on the **date** column (`YYYY-MM-DD`), not on `date_id`.
 
-## Column-type settings for a BI tool
+## 2. Column-type settings for a BI tool
 
 | Type | Columns |
 |---|---|
@@ -45,7 +33,7 @@ Facts join to `dim_date` on the **date** column (`YYYY-MM-DD`), not on `date_id`
 
 `return_ytd`, `benchmark_return_ytd`, `active_alpha_ytd` and `cash_pct` are decimal fractions (0.0928 = 9.28%). Format them as percentages; do not divide again.
 
-## Flag columns added
+## 3. Flag columns added
 
 | Table | Column | 1 means | Rows = 1 |
 |---|---|---|---:|
@@ -55,7 +43,7 @@ Facts join to `dim_date` on the **date** column (`YYYY-MM-DD`), not on `date_id`
 
 Flagged values were **not** changed. Exclude or segment them in reports as needed.
 
-## Known limitations (not fixed)
+## 4. Known limitations (not fixed)
 
 | Limitation | Reason not fixed |
 |---|---|
