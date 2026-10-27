@@ -5,11 +5,11 @@
 | Field | Entry |
 |---|---|
 | **Table / column** | `dim_client` / `client_id` |
-| **Evidence** | 25 clients (IDs 2501–2525) match an existing client on every field except a misspelled last name (e.g. "Taylo" vs "Taylor"), and have no fact rows. |
+| **Evidence** | 25 clients (IDs 2501–2525) match an existing client on first name, age, city, ZIP, client_since and advisor but have a misspelled last name (e.g. "Taylo" vs "Taylor"), and have no fact rows. |
 | **Dimension violated** | Uniqueness |
 | **Decision** | Quarantine |
 | **Justification** | One real person counted twice inflates client counts and AUM totals by tier/advisor. Keeping the original ID is safe because no fee, snapshot or transaction refers to the duplicates, so no fact row loses its client. |
-| **Risk** | If any were genuinely different people, we would drop a real client. Very unlikely: 7 fields match exactly and none has any activity. |
+| **Risk** | If any were genuinely different people, we would drop a real client. Very unlikely: every other field matches and none has any activity. |
 
 ### 1b. Transactions for clients that do not exist
 | Field | Entry |
@@ -25,7 +25,7 @@
 | Field | Entry |
 |---|---|
 | **Table / column** | `fact_transactions` / `shares` |
-| **Evidence** | 836 Buy rows have negative shares, yet every one satisfies amount = \|shares\| × price. |
+| **Evidence** | 836 Buy rows have negative shares, yet every one satisfies amount = \|shares\| × price. One is on an orphan transaction quarantined in 1b, so 835 remain to convert. |
 | **Dimension violated** | Validity, Accuracy |
 | **Decision** | Convert |
 | **Justification** | Direction is already carried by `txn_type`; every other Buy has positive shares. The amount and price reconcile to the positive quantity, so the sign is the only thing wrong. |
@@ -65,7 +65,7 @@
 | Field | Entry |
 |---|---|
 | **Table / column** | `dim_client` / `risk_profile` |
-| **Evidence** | 76 blanks; every blank-profile client with snapshots uses benchmark 3, which only Balanced clients use. |
+| **Evidence** | 76 blanks, one on a duplicate quarantined in 1a, leaving 75; all 75 use benchmark 3, which only Balanced clients use. |
 | **Dimension violated** | Completeness |
 | **Decision** | Fill |
 | **Justification** | The benchmark is assigned from the risk profile, and benchmark 3 maps one-to-one to Balanced, so this is a recovery from another table, not a guess. |
