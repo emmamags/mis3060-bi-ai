@@ -1,0 +1,80 @@
+severity,check_group,table,column,check,rows_affected,pct_rows,example,detail
+ERROR,1 Column,dim_client,state,value not in allowed list,78,3.089,Pennsylvania; Florida; New York; New Jersey; California; Illinois,"allowed: ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY']"
+ERROR,1 Column,fact_portfolio_snapshot,return_ytd,values fail to parse as decimal,300,0.232,9.28%; 19.52%; 13.35%; 4.04%; -3.18%,will become NaN / break math if converted blindly
+ERROR,1 Column,fact_transactions,security_id,integer key stored as decimal text (e.g. '45.0'),197175,65.995,45.0,text join to an integer PK ('45') will fail
+ERROR,1 Column,fact_transactions,shares,"outside business range [0.0001, None]",836,0.28,-261.9719; -338.0946; -360.8407; -237.4548; -374.4641,observed min -499.6323 max 499.9981
+ERROR,2 Row,dim_client,first_name+age+city+zip_code+client_since+advisor_id,"near-duplicate clients (same person, different last-name spelling)",25,0.99,Collins vs Collin; Armstrong vs Armstron; Lopez vs Lope,"pairs match on first name, age, city, zip, client_since, advisor"
+ERROR,2 Row,fact_transactions,amount vs shares*price,Buy/Sell amount = shares x price (+-0.05),836,0.28,"[['272', '-261.9719', '441.71', '115715.61'], ['812', '-338.0946', '397.85', '134510.94']]",
+ERROR,3 RI,fact_transactions,client_id,FK -> dim_client.client_id: orphan rows,200,0.067,3191; 3017; 3058; 2974; 3131,200 distinct orphan keys; null-key rows 0
+WARN,1 Column,dim_client,state,mixed formats: 96.9% look like 'AA',78,3.089,Pennsylvania; New York; New Jersey; Illinois; California; Florida,
+WARN,1 Column,dim_client,risk_profile,blank values,76,3.01,,see 2 Row 'structural blank' check: may be legitimate
+WARN,1 Column,dim_security,sector,blank values,219,43.8,,see 2 Row 'structural blank' check: may be legitimate
+WARN,1 Column,dim_security,expense_ratio_bps,blank values,281,56.2,,see 2 Row 'structural blank' check: may be legitimate
+WARN,1 Column,fact_portfolio_snapshot,return_ytd,"implausible (outside [-0.6, 1.0])",2157,1.665,-0.647622; -0.631723; -0.614962; -0.97695; -0.97695,"investigate - may be real (tiny accounts, big flows)"
+WARN,1 Column,fact_transactions,security_id,blank values,101597,34.005,,see 2 Row 'structural blank' check: may be legitimate
+WARN,1 Column,fact_transactions,shares,blank values,101597,34.005,,see 2 Row 'structural blank' check: may be legitimate
+WARN,1 Column,fact_transactions,price,blank values,101597,34.005,,see 2 Row 'structural blank' check: may be legitimate
+WARN,2 Row,dim_client,risk_profile,blank not explained by any category column (true missing?),76,3.01,,
+WARN,2 Row,fact_portfolio_snapshot,aum,420 rows sit exactly at the minimum value 1000.0 (floor/placeholder?),420,0.324,,92 clients
+WARN,2 Row,fact_transactions,shares,"...of those, amount = |shares| x price (sign flipped)",836,0.28,,evidence the amount is right and only the sign of shares is wrong
+WARN,4 Cross,dim_client,client_id,client has no rows in any fact table,25,0.99,2501; 2502; 2503; 2504; 2505,
+WARN,4 Cross,fact_portfolio_snapshot,(fees),snapshot month with no fee charged,7350,5.674,,2261 clients - waiver or missing load?
+WARN,4 Cross,fact_transactions,amount (Advisory Fee),"Advisory Fee debits vs fact_fees (Advisory only), same client-month",7653,100.0,,"0 of 7653 client-months present in both match; totals tx 263,780,236 vs fees 53,617,373"
+INFO,1 Column,dim_advisor,certifications,text that looks like a null token,6,24.0,None,pd.read_csv default would turn this into NaN - decide if it means 'missing' or a real value
+INFO,1 Column,dim_advisor,advisor_id,primary key unique,0,0.0,[],25 distinct of 25 rows
+INFO,1 Column,dim_benchmark,benchmark_id,primary key unique,0,0.0,[],8 distinct of 8 rows
+INFO,1 Column,dim_client,client_id,primary key unique,0,0.0,[],2525 distinct of 2525 rows
+INFO,1 Column,dim_date,date_id,primary key unique,0,0.0,[],1827 distinct of 1827 rows
+INFO,1 Column,dim_security,security_id,primary key unique,0,0.0,[],500 distinct of 500 rows
+INFO,1 Column,fact_fees,fee_id,primary key unique,0,0.0,[],122197 distinct of 122197 rows
+INFO,1 Column,fact_portfolio_snapshot,snapshot_id,primary key unique,0,0.0,[],129547 distinct of 129547 rows
+INFO,1 Column,fact_transactions,txn_id,primary key unique,0,0.0,[],298772 distinct of 298772 rows
+INFO,2 Row,dim_advisor,(all but PK),exact duplicate rows ignoring the ID,0,0.0,,
+INFO,2 Row,dim_benchmark,(all but PK),exact duplicate rows ignoring the ID,0,0.0,,
+INFO,2 Row,dim_client,(all but PK),exact duplicate rows ignoring the ID,0,0.0,,
+INFO,2 Row,dim_date,(all but PK),exact duplicate rows ignoring the ID,0,0.0,,
+INFO,2 Row,dim_date,date,natural key (grain) unique,0,0.0,,
+INFO,2 Row,dim_date,year,year agrees with date,0,0.0,,
+INFO,2 Row,dim_date,quarter,quarter agrees with date,0,0.0,,
+INFO,2 Row,dim_date,month,month agrees with date,0,0.0,,
+INFO,2 Row,dim_date,day_of_week,day_of_week agrees with date,0,0.0,,
+INFO,2 Row,dim_date,month_name,month_name agrees with date,0,0.0,,
+INFO,2 Row,dim_date,is_month_end,is_month_end agrees with date,0,0.0,,
+INFO,2 Row,dim_date,is_quarter_end,is_quarter_end agrees with date,0,0.0,,
+INFO,2 Row,dim_date,is_year_end,is_year_end agrees with date,0,0.0,,
+INFO,2 Row,dim_date,is_trading_day,is_trading_day agrees with date,0,0.0,,is_trading_day check = weekday only (holidays ignored)
+INFO,2 Row,dim_security,sector,"structural blank: blank exactly when asset_class in ['Alternative', 'Cash Equivalent', 'Fixed Income']",219,43.8,,"legitimate structure, not a defect"
+INFO,2 Row,dim_security,expense_ratio_bps,structural blank: blank exactly when asset_class in ['Equity'],281,56.2,,"legitimate structure, not a defect"
+INFO,2 Row,dim_security,(all but PK),exact duplicate rows ignoring the ID,0,0.0,,
+INFO,2 Row,fact_fees,(all but PK),exact duplicate rows ignoring the ID,0,0.0,,
+INFO,2 Row,fact_fees,client_id+fee_date+fee_type,natural key (grain) unique,0,0.0,,
+INFO,2 Row,fact_fees,amount,amount = aum_basis x bps/10000/12 (+-0.05),0,0.0,,
+INFO,2 Row,fact_portfolio_snapshot,(all but PK),exact duplicate rows ignoring the ID,0,0.0,,
+INFO,2 Row,fact_portfolio_snapshot,client_id+snapshot_date,natural key (grain) unique,0,0.0,,
+INFO,2 Row,fact_portfolio_snapshot,active_alpha_ytd,alpha = return_ytd - benchmark_return_ytd (treating 'x%' as x/100),0,0.0,,
+INFO,2 Row,fact_portfolio_snapshot,year/month,year & month agree with snapshot_date,0,0.0,,
+INFO,2 Row,fact_transactions,security_id,"structural blank: blank exactly when txn_type in ['Advisory Fee', 'Deposit', 'Withdrawal']",101597,34.005,,"legitimate structure, not a defect"
+INFO,2 Row,fact_transactions,shares,"structural blank: blank exactly when txn_type in ['Advisory Fee', 'Deposit', 'Withdrawal']",101597,34.005,,"legitimate structure, not a defect"
+INFO,2 Row,fact_transactions,price,"structural blank: blank exactly when txn_type in ['Advisory Fee', 'Deposit', 'Withdrawal']",101597,34.005,,"legitimate structure, not a defect"
+INFO,2 Row,fact_transactions,(all but PK),exact duplicate rows ignoring the ID,0,0.0,,
+INFO,2 Row,fact_transactions,amount vs shares*price,Dividend amount = shares x price (+-0.05),0,0.0,,
+INFO,3 RI,dim_client,advisor_id,FK -> dim_advisor.advisor_id: orphan rows,0,0.0,,0 distinct orphan keys; null-key rows 0
+INFO,3 RI,dim_security,benchmark_id,FK -> dim_benchmark.benchmark_id: orphan rows,0,0.0,,0 distinct orphan keys; null-key rows 0
+INFO,3 RI,fact_fees,client_id,FK -> dim_client.client_id: orphan rows,0,0.0,,0 distinct orphan keys; null-key rows 0
+INFO,3 RI,fact_fees,advisor_id,FK -> dim_advisor.advisor_id: orphan rows,0,0.0,,0 distinct orphan keys; null-key rows 0
+INFO,3 RI,fact_fees,fee_date,FK -> dim_date.date: orphan rows,0,0.0,,0 distinct orphan keys; null-key rows 0
+INFO,3 RI,fact_portfolio_snapshot,client_id,FK -> dim_client.client_id: orphan rows,0,0.0,,0 distinct orphan keys; null-key rows 0
+INFO,3 RI,fact_portfolio_snapshot,advisor_id,FK -> dim_advisor.advisor_id: orphan rows,0,0.0,,0 distinct orphan keys; null-key rows 0
+INFO,3 RI,fact_portfolio_snapshot,benchmark_id,FK -> dim_benchmark.benchmark_id: orphan rows,0,0.0,,0 distinct orphan keys; null-key rows 0
+INFO,3 RI,fact_portfolio_snapshot,snapshot_date,FK -> dim_date.date: orphan rows,0,0.0,,0 distinct orphan keys; null-key rows 0
+INFO,3 RI,fact_transactions,advisor_id,FK -> dim_advisor.advisor_id: orphan rows,0,0.0,,0 distinct orphan keys; null-key rows 0
+INFO,3 RI,fact_transactions,security_id,FK -> dim_security.security_id: orphan rows,0,0.0,,0 distinct orphan keys; null-key rows 101597
+INFO,3 RI,fact_transactions,txn_date,FK -> dim_date.date: orphan rows,0,0.0,,0 distinct orphan keys; null-key rows 0
+INFO,4 Cross,fact_fees,advisor_id,fact advisor = client's advisor in dim_client,0,0.0,,
+INFO,4 Cross,fact_fees,fee_date,activity dated before client_since,858,0.702,,100% fall in the same month the client joined (month-start snapshot convention -> legitimate)
+INFO,4 Cross,fact_fees,aum_basis,fee aum_basis = snapshot aum for same client-month,0,0.0,,
+INFO,4 Cross,fact_portfolio_snapshot,advisor_id,fact advisor = client's advisor in dim_client,0,0.0,,
+INFO,4 Cross,fact_portfolio_snapshot,snapshot_date,activity dated before client_since,930,0.718,,100% fall in the same month the client joined (month-start snapshot convention -> legitimate)
+INFO,4 Cross,fact_portfolio_snapshot,account_type,snapshot account_type = dim_client.primary_account_type,0,0.0,,
+INFO,4 Cross,fact_portfolio_snapshot,benchmark_id,risk_profile -> benchmark mapping,0,0.0,,(blank)->3; Aggressive->1; Balanced->3; Conservative->8; Moderately Aggressive->1; Moderately Conservative->8
+INFO,4 Cross,fact_transactions,advisor_id,fact advisor = client's advisor in dim_client,0,0.0,,
